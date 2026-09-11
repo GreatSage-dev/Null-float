@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NULL-FLOAT // Protocol Console</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            seafoam: '#27B666',
+            sky: '#92EBBF',
+            amber: '#FBBF24',
+            surface: {
+              base: '#080E0B',
+              card: '#0F1A14',
+              well: '#0A120E',
+              border: 'rgba(193, 255, 232, 0.08)',
+              highlight: 'rgba(193, 255, 232, 0.16)'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Linear / Vercel Grade Minimalist Developer Aesthetics */
+    .terminal-card {
+      background: #0F1A14;
+      border: 1px solid rgba(193, 255, 232, 0.08);
+      border-top: 1px solid rgba(193, 255, 232, 0.18);
+      box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.9);
+    }
+
+    .subtle-grid {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0);
+      background-size: 20px 20px;
+    }
+
+    /* Custom scrollbar for audit log */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.12); border-radius: 4px; }
+  </style>
+</head>
+<body class="bg-surface-base text-zinc-200 font-sans min-h-screen selection:bg-seafoam/20 selection:text-seafoam antialiased flex flex-col justify-between">
+
+  <!-- BACKGROUND SUBTLE ATMOSPHERE -->
+  <div class="fixed inset-0 pointer-events-none z-0">
+    <div class="absolute inset-0 subtle-grid opacity-50"></div>
+    <div class="absolute -top-32 right-1/4 w-[600px] h-[600px] bg-seafoam/[0.02] rounded-full blur-[140px]"></div>
+  </div>
+
+  <!-- CONSOLE TOPBAR -->
+  <header class="relative z-50 border-b border-surface-border bg-surface-base/95 backdrop-blur px-6 sm:px-8 py-3.5 flex-shrink-0">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      
+      <!-- Brand & Network Meta -->
+      <div class="flex items-center space-x-5">
+        <a href="index.html" class="flex items-center space-x-2.5">
+          <span class="w-2 h-2 rounded-full bg-seafoam"></span>
+          <span class="text-sm font-bold tracking-tight text-white font-mono">NULL_FLOAT</span>
+          <span class="text-[10px] font-mono text-zinc-500 bg-zinc-900 px-1.5 py-0.5 rounded border border-zinc-800">v1.0-shannon</span>
+        </a>
+
+        <div class="hidden md:flex items-center space-x-2 text-xs font-mono text-zinc-400 pl-4 border-l border-surface-border">
+          <span class="w-1.5 h-1.5 rounded-full bg-seafoam animate-pulse"></span>
+          <span>Somnia Shannon (50312)</span>
+          <span class="text-zinc-600">•</span>
+          <span class="text-zinc-500">Precompile: 0x0100</span>
+        </div>
+      </div>
+
+      <!-- Segmented Navigation Tabs -->
+      <nav class="flex items-center bg-zinc-900/90 p-1 rounded-xl border border-surface-border text-xs font-medium">
+        <button onclick="switchTab('simulator')" id="nav-simulator" class="px-3.5 py-1.5 rounded-lg text-white bg-zinc-800 font-mono text-[11px] transition-all shadow-sm">
+          Simulator
+        </button>
+        <button onclick="switchTab('orderbook')" id="nav-orderbook" class="px-3.5 py-1.5 rounded-lg text-zinc-400 hover:text-white font-mono text-[11px] transition-all">
+          Orderbook
+        </button>
+        <button onclick="switchTab('vault')" id="nav-vault" class="px-3.5 py-1.5 rounded-lg text-zinc-400 hover:text-white font-mono text-[11px] transition-all">
+          Vault (4626)
+        </button>
+        <button onclick="switchTab('audit')" id="nav-audit" class="px-3.5 py-1.5 rounded-lg text-zinc-400 hover:text-white font-mono text-[11px] transition-all">
+          Audit Trail
+        </button>
+      </nav>
+
+      <!-- Return Link -->
+      <div class="flex items-center">
+        <a href="index.html" class="text-xs text-zinc-400 hover:text-white font-medium flex items-center space-x-1 transition-colors">
+          <span>Overview</span>
+          <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+          </svg>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- MAIN OPERATIONAL INTERFACE -->
+  <main class="relative z-10 flex-1 max-w-7xl w-full mx-auto px-6 sm:px-8 py-8 space-y-6">
+    
+    <!-- System Telemetry Ribbon -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+      
+      <div class="p-4 rounded-xl terminal-card">
+        <div class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Settlement Architecture</div>
+        <div class="text-sm font-bold font-mono text-white mt-1 flex items-center space-x-2">
+          <span class="w-1.5 h-1.5 rounded-full bg-seafoam"></span>
+          <span>Intra-Block (0x0100)</span>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-xl terminal-card">
+        <div class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Float Latency (Δb)</div>
+        <div class="text-sm font-bold font-mono text-seafoam mt-1">
+          0 Blocks <span class="text-zinc-500 font-normal font-sans text-xs">(0.00ms)</span>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-xl terminal-card">
+        <div class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Spread Capture Rate</div>
+        <div class="text-sm font-bold font-mono text-sky mt-1">
+          +1.01% USDso <span class="text-zinc-500 font-normal font-sans text-xs">/ roll</span>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-xl terminal-card">
+        <div class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Quarantine Boundary</div>
+        <div class="text-sm font-bold font-mono text-zinc-300 mt-1 flex items-center justify-between">
+          <span>&le; 350 bps</span>
+          <span class="text-[10px] font-mono text-seafoam bg-seafoam/10 px-1.5 py-0.5 rounded" id="ribbonSafetyBadge">ARMED</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- TAB 1: SIMULATOR WORKBENCH                                          -->
+    <!-- =================================================================== -->
+    <div id="tab-simulator" class="tab-pane space-y-6">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left: Settlement Execution Engine -->
+        <div class="lg:col-span-6 p-6 rounded-2xl terminal-card space-y-5">
+          <div class="flex items-center justify-between border-b border-surface-border pb-3">
+            <div>
+              <div class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Execution Controls</div>
+              <h2 class="text-base font-bold text-white mt-0.5 font-mono">Window Settlement Engine</h2>
+            </div>
+            <span class="text-xs font-mono font-bold text-seafoam bg-seafoam/10 border border-seafoam/20 px-2.5 py-1 rounded-md" id="simWindowBadge">
+              WINDOW_ID #104
+            </span>
+          </div>
+
+          <!-- Oracle Divergence Telemetry Table -->
+          <div class="rounded-xl bg-surface-well border border-surface-border p-4 font-mono text-xs space-y-2.5">
+            <div class="flex justify-between items-center text-zinc-400">
+              <span>Oracle Spot Price (S):</span>
+              <span class="text-white font-semibold" id="simSpotPrice">$65,000.00</span>
+            </div>
+            <div class="flex justify-between items-center text-zinc-400">
+              <span>dreamDEX 1s EMA (P_ema):</span>
+              <span class="text-white font-semibold" id="simEmaPrice">$65,005.00</span>
+            </div>
+            <div class="flex justify-between items-center pt-2 border-t border-surface-border">
+              <span class="text-zinc-400">Divergence |S - P_ema|:</span>
+              <span class="text-seafoam font-bold" id="simDivergence">0.7 bps (Continuity Verified)</span>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <div class="space-y-2.5 pt-1">
+            <button onclick="triggerSettlement()" class="w-full py-3 px-4 rounded-xl bg-seafoam text-zinc-950 font-semibold text-xs font-mono uppercase tracking-wider hover:brightness-110 active:scale-[0.99] transition-all shadow-sm">
+              Trigger Intra-Block Rollover (0x0100)
+            </button>
+
+            <button onclick="triggerShock()" class="w-full py-2.5 px-4 rounded-xl bg-amber/10 text-amber border border-amber/30 font-semibold text-xs font-mono uppercase tracking-wider hover:bg-amber/20 active:scale-[0.99] transition-all">
+              Inject 500 bps Shock (Test Refusal)
+            </button>
+
+            <button onclick="resetState()" class="w-full text-center text-[11px] font-mono text-zinc-500 hover:text-zinc-300 py-1 transition-colors">
+              Reset simulator state
+            </button>
+          </div>
+
+          <!-- Status Notice -->
+          <div id="simStatusAlert" class="p-3.5 rounded-xl bg-zinc-900 border border-surface-border text-xs flex items-start space-x-3">
+            <div class="w-1.5 h-1.5 rounded-full bg-seafoam mt-1.5 flex-shrink-0" id="simStatusDot"></div>
+            <div class="text-zinc-300 text-[11px] leading-relaxed" id="simStatusText">
+              <strong>System Operational:</strong> Precompile listener attached to dreamDEX SpotPool. Ready for atomic event dispatch.
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Float Drag Chronometer Benchmark -->
+        <div class="lg:col-span-6 p-6 rounded-2xl terminal-card space-y-5">
+          <div class="flex items-center justify-between border-b border-surface-border pb-3">
+            <div>
+              <div class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Benchmark Telemetry</div>
+              <h2 class="text-base font-bold text-white mt-0.5 font-mono">Float Latency Comparison</h2>
+            </div>
+            <span class="text-[11px] font-mono text-zinc-500">Ref: Block #50123</span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            
+            <!-- Off-Chain Architecture -->
+            <div class="p-4 rounded-xl bg-surface-well border border-rose-900/30 space-y-2">
+              <div class="flex items-center justify-between text-[11px] font-mono text-rose-400">
+                <span>OFF-CHAIN BOT</span>
+                <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+              </div>
+              <div class="text-2xl font-bold font-mono text-rose-400">
+                28.4s
+              </div>
+              <div class="text-[11px] text-zinc-500 leading-normal">
+                RPC polling, manual redemption tx, and order submission mempool roundtrip.
+              </div>
+            </div>
+
+            <!-- Somnia L1 Architecture -->
+            <div class="p-4 rounded-xl bg-surface-well border border-seafoam/30 space-y-2">
+              <div class="flex items-center justify-between text-[11px] font-mono text-seafoam">
+                <span>SOMNIA 0x0100</span>
+                <span class="w-1.5 h-1.5 rounded-full bg-seafoam animate-pulse"></span>
+              </div>
+              <div class="text-2xl font-bold font-mono text-seafoam">
+                0.00ms
+              </div>
+              <div class="text-[11px] text-zinc-400 leading-normal">
+                Single-transaction atomic settle, redeem, and two-sided quote deployment.
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Parity Quote Output Box -->
+          <div class="p-4 rounded-xl bg-surface-well border border-surface-border font-mono text-xs space-y-2">
+            <div class="text-[10px] text-zinc-500 uppercase tracking-wider">Active Parity Quotes Deployed</div>
+            <div class="flex justify-between text-zinc-300">
+              <span>Bid YES (Window N+1):</span>
+              <span class="text-seafoam font-bold">$0.4950 USDso</span>
+            </div>
+            <div class="flex justify-between text-zinc-300">
+              <span>Bid NO (Window N+1):</span>
+              <span class="text-sky font-bold">$0.4950 USDso</span>
+            </div>
+            <div class="flex justify-between pt-1.5 border-t border-surface-border text-zinc-400 text-[11px]">
+              <span>Locked Spread Capture:</span>
+              <span class="text-white font-bold">+1.01% on full turn</span>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- TAB 2: DREAMDEX CLOB & PARITY INVARIANT                             -->
+    <!-- =================================================================== -->
+    <div id="tab-orderbook" class="tab-pane hidden space-y-6">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left: Live dreamDEX SpotPool Limit Order Table -->
+        <div class="lg:col-span-7 p-6 rounded-2xl terminal-card space-y-5">
+          <div class="flex items-center justify-between border-b border-surface-border pb-3">
+            <div>
+              <div class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Central Limit Order Book</div>
+              <h2 class="text-base font-bold text-white mt-0.5 font-mono">dreamDEX SpotPool Depth</h2>
+            </div>
+            <span id="orderbookStrike" class="text-xs font-mono text-zinc-400">Strike: $65,000.00</span>
+          </div>
+
+          <!-- Order Table -->
+          <div class="rounded-xl bg-surface-well border border-surface-border overflow-hidden">
+            <table class="w-full text-left font-mono text-xs">
+              <thead class="bg-zinc-900/60 text-zinc-500 text-[10px] uppercase border-b border-surface-border">
+                <tr>
+                  <th class="p-3">Instrument</th>
+                  <th class="p-3">Side</th>
+                  <th class="p-3">Bid Price</th>
+                  <th class="p-3">Quantity</th>
+                  <th class="p-3 text-right">Status</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-surface-border text-zinc-300">
+                <tr>
+                  <td class="p-3 font-semibold text-white">BTC-YES</td>
+                  <td class="p-3 text-seafoam font-semibold">BUY</td>
+                  <td class="p-3 text-white font-bold">$0.4950</td>
+                  <td class="p-3 text-zinc-400">25.0 USDso</td>
+                  <td class="p-3 text-right text-seafoam">ACTIVE</td>
+                </tr>
+                <tr>
+                  <td class="p-3 font-semibold text-white">BTC-NO</td>
+                  <td class="p-3 text-sky font-semibold">BUY</td>
+                  <td class="p-3 text-white font-bold">$0.4950</td>
+                  <td class="p-3 text-zinc-400">25.0 USDso</td>
+                  <td class="p-3 text-right text-sky">ACTIVE</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="flex items-center justify-between text-xs font-mono text-zinc-400 px-1">
+            <span>Aggregate Capital Locked: <strong class="text-white">50.00 USDso</strong></span>
+            <span>Invariant: <strong class="text-seafoam">YES + NO &lt; 1.000</strong></span>
+          </div>
+        </div>
+
+        <!-- Right: Mathematical Parity Invariant Specification -->
+        <div class="lg:col-span-5 p-6 rounded-2xl terminal-card space-y-5">
+          <div class="border-b border-surface-border pb-3">
+            <div class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Mechanism Proof</div>
+            <h2 class="text-base font-bold text-white mt-0.5 font-mono">Zero-Inventory Parity</h2>
+          </div>
+
+          <div class="p-4 rounded-xl bg-surface-well border border-surface-border space-y-2.5 font-mono text-xs">
+            <div class="text-zinc-500 text-[10px] uppercase">Parity Rule:</div>
+            <div class="text-lg font-bold text-white">YES(p) + NO(p) &equiv; 1.0000 USDso</div>
+            <p class="text-zinc-400 text-[11px] leading-relaxed">
+              At window opening, strike equals spot. Holding equal units of YES and NO guarantees full hedge neutrality regardless of directional market movement.
+            </p>
+          </div>
+
+          <div class="space-y-2 font-mono text-xs">
+            <div class="flex justify-between text-zinc-400">
+              <span>Bid YES Cost:</span>
+              <span class="text-white">$0.4950</span>
+            </div>
+            <div class="flex justify-between text-zinc-400">
+              <span>Bid NO Cost:</span>
+              <span class="text-white">$0.4950</span>
+            </div>
+            <div class="flex justify-between text-zinc-400">
+              <span>Total Capital Outlay:</span>
+              <span class="text-white">$0.9900</span>
+            </div>
+            <div class="flex justify-between pt-2 border-t border-surface-border text-seafoam font-semibold">
+              <span>Deterministic Spread:</span>
+              <span>+$0.0100 (+1.01%)</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- TAB 3: LIQUIDITY VAULT (ERC-4626)                                   -->
+    <!-- =================================================================== -->
+    <div id="tab-vault" class="tab-pane hidden space-y-6">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        
+        <!-- Left: Vault Portfolio Metrics -->
+        <div class="lg:col-span-6 p-6 rounded-2xl terminal-card space-y-5">
+          <div class="flex items-center justify-between border-b border-surface-border pb-3">
+            <div>
+              <div class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">Public Pool</div>
+              <h2 class="text-base font-bold text-white mt-0.5 font-mono">NullFloatVault.sol</h2>
+            </div>
+            <span class="text-xs font-mono text-seafoam bg-seafoam/10 px-2.5 py-1 rounded border border-seafoam/20">
+              ERC-4626 (nfUSDso)
+            </span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 font-mono">
+            <div class="p-4 rounded-xl bg-surface-well border border-surface-border">
+              <div class="text-[10px] text-zinc-500 uppercase">Total Assets Pooled</div>
+              <div class="text-xl font-bold text-white mt-1" id="vaultTabAssets">151.50 USDso</div>
+              <div class="text-[10px] text-zinc-400 mt-1">Non-Custodial Collateral</div>
+            </div>
+
+            <div class="p-4 rounded-xl bg-surface-well border border-surface-border">
+              <div class="text-[10px] text-zinc-500 uppercase">Share Price (NAV)</div>
+              <div class="text-xl font-bold text-seafoam mt-1" id="vaultTabNAV">1.0100 USDso</div>
+              <div class="text-[10px] text-zinc-400 mt-1">+1.00% Realized Spread</div>
+            </div>
+          </div>
+
+          <div class="text-xs text-zinc-400 font-mono leading-relaxed p-3.5 rounded-xl bg-surface-well border border-surface-border">
+            The clearinghouse draws liquidity exclusively to place risk-neutral parity bids, returning capital and captured spread at window resolution without directional principal exposure.
+          </div>
+        </div>
+
+        <!-- Right: Deposit Simulator -->
+        <div class="lg:col-span-6 p-6 rounded-2xl terminal-card space-y-5">
+          <div class="border-b border-surface-border pb-3">
+            <div class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">LP Simulation</div>
+            <h2 class="text-base font-bold text-white mt-0.5 font-mono">Deposit & Mint Shares</h2>
+          </div>
+
+          <div class="space-y-4 font-mono text-xs">
+            <div>
+              <label class="text-zinc-400 text-[11px] block mb-1.5">Deposit Collateral (USDso):</label>
+              <div class="flex items-center space-x-2.5">
+                <input id="vaultDepositInput" type="number" value="50" class="flex-1 bg-surface-well border border-surface-border rounded-xl px-3.5 py-2.5 text-sm font-mono text-white focus:outline-none focus:border-seafoam">
+                <button onclick="handleVaultDeposit()" class="px-5 py-2.5 bg-seafoam text-zinc-950 font-bold text-xs uppercase tracking-wider rounded-xl hover:brightness-110 transition-all">
+                  Deposit
+                </button>
+              </div>
+            </div>
+
+            <div class="p-3.5 rounded-xl bg-surface-well border border-surface-border space-y-2 text-[11px]">
+              <div class="flex justify-between text-zinc-400">
+                <span>Calculated Shares Minted:</span>
+                <span class="text-white font-bold" id="vaultCalculatedShares">49.50 nfUSDso</span>
+              </div>
+              <div class="flex justify-between text-zinc-400">
+                <span>Redemption Value:</span>
+                <span class="text-seafoam font-bold" id="vaultRedemptionValue">50.00 USDso</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- =================================================================== -->
+    <!-- TAB 4: AUDIT RECEIPTS & LOGS                                        -->
+    <!-- =================================================================== -->
+    <div id="tab-audit" class="tab-pane hidden space-y-6">
+      
+      <div class="p-6 rounded-2xl terminal-card space-y-4">
+        <div class="flex items-center justify-between border-b border-surface-border pb-3">
+          <div>
+            <div class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider">NullFloatLogger.sol</div>
+            <h2 class="text-base font-bold text-white mt-0.5 font-mono">Deterministic On-Chain Receipts</h2>
+          </div>
+          <span class="text-xs font-mono text-seafoam flex items-center space-x-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-seafoam animate-pulse"></span>
+            <span>0-Block Float Verification</span>
+          </span>
+        </div>
+
+        <!-- Terminal Output -->
+        <div id="terminalStream" class="rounded-xl bg-surface-well border border-surface-border p-4 h-72 overflow-y-auto space-y-2 font-mono text-[11px] leading-relaxed">
+          <div class="text-zinc-600">[GENESIS] Smart contracts initialized on Somnia Shannon Testnet.</div>
+          <div class="text-sky">[CONFIG] Precompile wired: 0x0000000000000000000000000000000000000100</div>
+          <div class="text-seafoam">[RECEIPT] Window #100 -&gt; #101 rolled. Settlement Block: 50121 | Order Block: 50121 | Latency: Δb = 0 blocks.</div>
+          <div class="text-seafoam">[RECEIPT] Window #101 -&gt; #102 rolled. Settlement Block: 50122 | Order Block: 50122 | Latency: Δb = 0 blocks.</div>
+          <div class="text-zinc-500">[STANDBY] Listener active. Awaiting reactive onEvent invocation...</div>
+        </div>
+
+        <!-- Contract Registry -->
+        <div class="pt-3 border-t border-surface-border">
+          <div class="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-2">Verified Contract Deployments</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 font-mono text-xs">
+            <div class="p-3 rounded-lg bg-surface-well border border-surface-border">
+              <div class="text-[10px] text-zinc-500">NullFloatClearing:</div>
+              <div class="text-sky text-[11px] truncate font-semibold mt-0.5">0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0</div>
+            </div>
+            <div class="p-3 rounded-lg bg-surface-well border border-surface-border">
+              <div class="text-[10px] text-zinc-500">NullFloatVault:</div>
+              <div class="text-seafoam text-[11px] truncate font-semibold mt-0.5">0xCf7Ed3AccA5a467e9e704C703E8D87F634fB0Fc9</div>
+            </div>
+            <div class="p-3 rounded-lg bg-surface-well border border-surface-border">
+              <div class="text-[10px] text-zinc-500">NullFloatLogger:</div>
+              <div class="text-zinc-300 text-[11px] truncate font-semibold mt-0.5">0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- MINIMAL FOOTER -->
+  <footer class="relative z-10 border-t border-surface-border bg-surface-base px-6 sm:px-8 py-3.5 flex-shrink-0">
+    <div class="max-w-7xl mx-auto flex items-center justify-between text-xs text-zinc-500 font-mono">
+      <div>NULL-FLOAT // Continuous Net Settlement on Somnia L1</div>
+      <div>DoraHacks Event Contracts Hackathon</div>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT STATE ENGINE -->
+  <script>
+    let windowId = 104;
+    let blockHeight = 50123;
+    let totalShares = 150.00;
+    let vaultAssets = 151.50;
+
+    function getNAV() {
+      return totalShares > 0 ? (vaultAssets / totalShares) : 1.0;
+    }
+
+    function switchTab(id) {
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`tab-${id}`).classList.remove('hidden');
+
+      const tabs = ['simulator', 'orderbook', 'vault', 'audit'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`nav-${t}`);
+        if (t === id) {
+          btn.className = 'px-3.5 py-1.5 rounded-lg text-white bg-zinc-800 font-mono text-[11px] transition-all shadow-sm';
+        } else {
+          btn.className = 'px-3.5 py-1.5 rounded-lg text-zinc-400 hover:text-white font-mono text-[11px] transition-all';
+        }
+      });
+    }
+
+    function appendLog(msg, type = 'info') {
+      const stream = document.getElementById('terminalStream');
+      const entry = document.createElement('div');
+      if (type === 'success') entry.className = 'text-seafoam font-semibold';
+      else if (type === 'refusal') entry.className = 'text-amber font-semibold';
+      else entry.className = 'text-zinc-400';
+      entry.innerHTML = msg;
+      stream.prepend(entry);
+    }
+
+    function triggerSettlement() {
+      windowId++;
+      blockHeight++;
+      const harvestedSpread = 1.50;
+      vaultAssets += harvestedSpread;
+
+      const randomSpot = (Math.random() * 200 + 100).toFixed(2);
+      const randomEma = (parseFloat(randomSpot) + (Math.random() * 2 - 1)).toFixed(2);
+
+      // Update UI Telemetry
+      document.getElementById('simWindowBadge').innerText = `WINDOW_ID #${windowId}`;
+      document.getElementById('simSpotPrice').innerText = `$65,${randomSpot}`;
+      document.getElementById('simEmaPrice').innerText = `$65,${randomEma}`;
+      document.getElementById('simDivergence').innerText = '0.8 bps (Continuity Verified)';
+      document.getElementById('simDivergence').className = 'text-seafoam font-bold';
+
+      // Update Orderbook tab strike
+      const orderbookStrikeEl = document.getElementById('orderbookStrike');
+      if (orderbookStrikeEl) {
+        orderbookStrikeEl.innerText = `Strike: $65,${randomSpot}`;
+      }
+
+      // Update Vault tab
+      document.getElementById('vaultTabAssets').innerText = `${vaultAssets.toFixed(2)} USDso`;
+      document.getElementById('vaultTabNAV').innerText = `${getNAV().toFixed(4)} USDso`;
+
+      // Status
+      const alert = document.getElementById('simStatusAlert');
+      alert.className = 'p-3.5 rounded-xl bg-zinc-900 border border-seafoam/40 text-xs flex items-start space-x-3';
+      document.getElementById('simStatusDot').className = 'w-1.5 h-1.5 rounded-full bg-seafoam mt-1.5 flex-shrink-0 animate-pulse';
+      document.getElementById('simStatusText').innerHTML = `
+        <strong>Intra-Block Settlement Confirmed:</strong> Window #${windowId - 1} redeemed. Window #${windowId} parity quotes deployed at Block #${blockHeight} (Δb = 0).
+      `;
+
+      appendLog(`[BLOCK #${blockHeight}] 0x0100 PRECOMPILE: Settlement event ingested. Rolled to Window #${windowId}. Latency: Δb = 0.`, 'success');
+      appendLog(`[BLOCK #${blockHeight}] SPREAD_CAP: +${harvestedSpread.toFixed(2)} USDso returned to Vault. NAV updated to ${getNAV().toFixed(4)} USDso.`, 'success');
+    }
+
+    function triggerShock() {
+      document.getElementById('simSpotPrice').innerText = `$60,000.00`;
+      document.getElementById('simEmaPrice').innerText = `$65,000.00`;
+      document.getElementById('simDivergence').innerText = '769 bps (DISCONTINUITY DETECTED)';
+      document.getElementById('simDivergence').className = 'text-amber font-bold';
+
+      // Slam Refusal State
+      const alert = document.getElementById('simStatusAlert');
+      alert.className = 'p-3.5 rounded-xl bg-amber/10 border border-amber/50 text-xs flex items-start space-x-3';
+      document.getElementById('simStatusDot').className = 'w-1.5 h-1.5 rounded-full bg-amber mt-1.5 flex-shrink-0 animate-ping';
+      document.getElementById('simStatusText').innerHTML = `
+        <strong class="text-amber">DISCONTINUITY QUARANTINE ACTIVATED:</strong> Divergence 769 bps exceeds 350 bps ceiling. <strong>TRADE REFUSED.</strong> 100% Vault Principal Protected.
+      `;
+
+      appendLog(`[QUARANTINE] DISCONTINUITY_REFUSAL: Spot/EMA divergence 769 bps exceeds 350 bps threshold.`, 'refusal');
+      appendLog(`[SAFETY] Refusal executed. Exactly 0 capital exposed to toxic flow.`, 'refusal');
+    }
+
+    function handleVaultDeposit() {
+      const amt = parseFloat(document.getElementById('vaultDepositInput').value) || 50;
+      const currentNav = getNAV();
+      const mintedShares = amt / currentNav;
+      
+      vaultAssets += amt;
+      totalShares += mintedShares;
+
+      document.getElementById('vaultTabAssets').innerText = `${vaultAssets.toFixed(2)} USDso`;
+      document.getElementById('vaultTabNAV').innerText = `${getNAV().toFixed(4)} USDso`;
+      document.getElementById('vaultCalculatedShares').innerText = `${mintedShares.toFixed(2)} nfUSDso`;
+      document.getElementById('vaultRedemptionValue').innerText = `${amt.toFixed(2)} USDso`;
+      appendLog(`[VAULT] Deposited ${amt.toFixed(2)} USDso. Minted ${mintedShares.toFixed(2)} nfUSDso shares @ NAV ${currentNav.toFixed(4)}.`, 'info');
+    }
+
+    function resetState() {
+      windowId = 104;
+      blockHeight = 50123;
+      totalShares = 150.00;
+      vaultAssets = 151.50;
+      document.getElementById('simWindowBadge').innerText = `WINDOW_ID #104`;
+      document.getElementById('simSpotPrice').innerText = `$65,000.00`;
+      document.getElementById('simEmaPrice').innerText = `$65,005.00`;
+      document.getElementById('simDivergence').innerText = '0.7 bps (Continuity Verified)';
+      document.getElementById('simDivergence').className = 'text-seafoam font-bold';
+      document.getElementById('vaultTabAssets').innerText = `151.50 USDso`;
+      document.getElementById('vaultTabNAV').innerText = `1.0100 USDso`;
+      
+      const orderbookStrikeEl = document.getElementById('orderbookStrike');
+      if (orderbookStrikeEl) {
+        orderbookStrikeEl.innerText = `Strike: $65,000.00`;
+      }
+
+      const alert = document.getElementById('simStatusAlert');
+      alert.className = 'p-3.5 rounded-xl bg-zinc-900 border border-surface-border text-xs flex items-start space-x-3';
+      document.getElementById('simStatusDot').className = 'w-1.5 h-1.5 rounded-full bg-seafoam mt-1.5 flex-shrink-0';
+      document.getElementById('simStatusText').innerHTML = `
+        <strong>System Operational:</strong> Precompile listener attached to dreamDEX SpotPool. Ready for atomic event dispatch.
+      `;
+      appendLog(`[RESET] Simulator returned to baseline state.`, 'info');
+    }
+  </script>
+
+</body>
+</html>

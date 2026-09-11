@@ -1,0 +1,25 @@
+{
+  "name": "null-float",
+  "version": "1.0.0",
+  "description": "NULL-FLOAT: Continuous Net Settlement Zero-Inventory Liquidity Clearinghouse for dreamDEX on Somnia L1",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "compile": "node scripts/compile_contracts.cjs",
+    "test": "node scripts/run_tests.cjs",
+    "sim": "node scripts/cns_rollover_sim.js",
+    "deploy:shannon": "node scripts/deploy.cjs"
+  },
+  "keywords": [
+    "somnia",
+    "reactivity",
+    "precompile-0x0100",
+    "dreamdex",
+    "continuous-net-settlement",
+    "clearinghouse",
+    "parity-minting",
+    "zero-inventory"
+  ],
+  "author": "Promzy (@0xgreatsage)",
+  "license": "MIT"
+}

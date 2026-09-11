@@ -1,0 +1,27 @@
+﻿# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Hardhat & Solc artifacts
+artifacts/
+cache/
+typechain/
+typechain-types/
+coverage/
+coverage.json
+
+# Environment & Secrets
+.env
+.env.local
+.env.*.local
+
+# OS & System
+.DS_Store
+Thumbs.db
+*.log
+
+# Scratch & Temporary files
+scratch/
+.system_generated/

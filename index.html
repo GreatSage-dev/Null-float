@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en" class="dark scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NULL-FLOAT | Continuous Net Settlement on Somnia L1</title>
+  
+  <!-- Premium Institutional Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            forest: {
+              DEFAULT: '#102B1C',
+              abyss: '#080E0B',
+              obsidian: '#0D1612',
+              deep: '#101C15',
+              surface: '#15241D',
+              card: '#182B21',
+              border: 'rgba(193, 255, 232, 0.08)',
+              highlight: 'rgba(193, 255, 232, 0.16)'
+            },
+            emerald: {
+              DEFAULT: '#27B666',
+              light: '#3AAB6D',
+              glow: '#51A373',
+              mint: '#92EBBF',
+              ice: '#C1FFE8'
+            },
+            lime: {
+              DEFAULT: '#BAEB7B',
+              glow: '#C2F47E',
+              soft: '#A1E381'
+            },
+            sage: {
+              DEFAULT: '#8E9B94',
+              light: '#EFFFF8',
+              subtle: '#52665B'
+            }
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          },
+          animation: {
+            'beam-radiance': 'beamRadiance 9s ease-in-out infinite alternate',
+            'card-float-1': 'floatCard1 8s ease-in-out infinite alternate',
+            'card-float-2': 'floatCard2 9s ease-in-out infinite alternate',
+            'card-float-3': 'floatCard3 8.5s ease-in-out infinite alternate',
+            'diamond-pulse': 'diamondPulse 5s ease-in-out infinite alternate',
+            'iso-float': 'isoFloat 7s ease-in-out infinite alternate'
+          },
+          keyframes: {
+            beamRadiance: {
+              '0%': { opacity: '0.88', filter: 'drop-shadow(0 0 30px rgba(193,255,232,0.25))' },
+              '100%': { opacity: '1.0', filter: 'drop-shadow(0 0 55px rgba(193,255,232,0.55)) drop-shadow(0 0 90px rgba(39,182,102,0.35))' }
+            },
+            floatCard1: {
+              '0%': { transform: 'translateY(0px) rotate(1.2deg)' },
+              '100%': { transform: 'translateY(-10px) rotate(1.8deg)' }
+            },
+            floatCard2: {
+              '0%': { transform: 'translateY(0px) rotate(-1.8deg)' },
+              '100%': { transform: 'translateY(-12px) rotate(-1deg)' }
+            },
+            floatCard3: {
+              '0%': { transform: 'translateY(0px) rotate(2deg)' },
+              '100%': { transform: 'translateY(-9px) rotate(2.6deg)' }
+            },
+            diamondPulse: {
+              '0%': { transform: 'rotate(45deg) scale(0.98)', filter: 'drop-shadow(0 0 20px rgba(186,235,123,0.35))' },
+              '100%': { transform: 'rotate(45deg) scale(1.02)', filter: 'drop-shadow(0 0 40px rgba(186,235,123,0.65)) drop-shadow(0 0 65px rgba(80,187,141,0.45))' }
+            },
+            isoFloat: {
+              '0%': { transform: 'rotateX(28deg) rotateZ(-22deg) translateY(0px)' },
+              '100%': { transform: 'rotateX(28deg) rotateZ(-22deg) translateY(-12px)' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Precision Institutional Smoked Glass */
+    .dexter-glass {
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(32px) saturate(140%);
+      -webkit-backdrop-filter: blur(32px) saturate(140%);
+      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .card-glow-1 {
+      background: 
+        radial-gradient(ellipse 90% 60% at 20% 10%, rgba(39, 182, 102, 0.22) 0%, rgba(16, 43, 28, 0.08) 45%, transparent 75%),
+        linear-gradient(145deg, rgba(20, 34, 26, 0.94) 0%, rgba(10, 18, 14, 0.98) 100%);
+      border: 1px solid rgba(193, 255, 232, 0.08);
+      border-top: 1px solid rgba(193, 255, 232, 0.25);
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
+    }
+
+    .card-glow-2 {
+      background: 
+        radial-gradient(ellipse 110% 75% at 50% 100%, rgba(39, 182, 102, 0.25) 0%, rgba(16, 43, 28, 0.08) 40%, transparent 85%),
+        linear-gradient(145deg, rgba(20, 34, 26, 0.94) 0%, rgba(10, 18, 14, 0.98) 100%);
+      border: 1px solid rgba(193, 255, 232, 0.08);
+      border-top: 1px solid rgba(193, 255, 232, 0.2);
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
+    }
+
+    .card-glow-3 {
+      background: 
+        radial-gradient(ellipse 110% 70% at 50% 0%, rgba(193, 255, 232, 0.22) 0%, rgba(39, 182, 102, 0.08) 45%, transparent 85%),
+        linear-gradient(145deg, rgba(20, 34, 26, 0.94) 0%, rgba(10, 18, 14, 0.98) 100%);
+      border: 1px solid rgba(193, 255, 232, 0.08);
+      border-top: 1px solid rgba(193, 255, 232, 0.3);
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
+    }
+
+    /* Dexter Exact Primary Button */
+    .luxury-btn-primary {
+      background: #27B666;
+      color: #06140C;
+      font-weight: 600;
+      box-shadow: 0 0 24px rgba(39, 182, 102, 0.45), 0 2px 4px rgba(0,0,0,0.3);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .luxury-btn-primary:hover {
+      background: #2FE07F;
+      box-shadow: 0 0 35px rgba(39, 182, 102, 0.65), 0 4px 8px rgba(0,0,0,0.3);
+      transform: translateY(-1px);
+    }
+
+    /* Sub-pixel Micro Matrix Texture */
+    .precision-matrix {
+      background-image: radial-gradient(rgba(193, 255, 232, 0.05) 1px, transparent 0);
+      background-size: 26px 26px;
+    }
+
+    /* Architectural Blueprint Grid */
+    .blueprint-grid {
+      background-image: 
+        linear-gradient(to right, rgba(80, 187, 141, 0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(80, 187, 141, 0.08) 1px, transparent 1px);
+      background-size: 32px 32px;
+    }
+
+    /* Luxury Card Surface */
+    .premium-slab {
+      background: linear-gradient(145deg, rgba(18, 33, 25, 0.85) 0%, rgba(9, 16, 12, 0.96) 100%);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(193, 255, 232, 0.08);
+      border-top: 1px solid rgba(193, 255, 232, 0.2);
+      box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7);
+    }
+  </style>
+</head>
+<body class="bg-forest-abyss text-sage-light font-sans min-h-screen selection:bg-emerald/20 selection:text-emerald-ice antialiased">
+
+  <!-- BACKGROUND OPTICAL STACK: Continuous Ambient Atmosphere (Dexter #0F1A14 / #080E0B) -->
+  <div class="fixed inset-0 pointer-events-none z-0">
+    <div class="absolute inset-0 bg-gradient-to-b from-[#0F1A14] via-[#0C1510] to-[#080E0B]"></div>
+    <div class="absolute inset-0 precision-matrix opacity-50"></div>
+    <div class="absolute -top-40 right-1/4 w-[900px] h-[900px] bg-emerald/6 rounded-full blur-[180px]"></div>
+    <div class="absolute top-1/2 -left-48 w-[650px] h-[650px] bg-emerald-glow/6 rounded-full blur-[190px]"></div>
+  </div>
+
+  <!-- NAVIGATION HEADER -->
+  <header class="relative z-50 max-w-7xl w-full mx-auto px-6 sm:px-10 pt-6 pb-2">
+    <nav class="flex items-center justify-between">
+      
+      <!-- Left Group: Logo + Left-Shifted Links -->
+      <div class="flex items-center space-x-12">
+        <a href="#" class="flex items-center space-x-2.5 group">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald shadow-[0_0_8px_#27B666] group-hover:scale-110 transition-transform"></span>
+          <span class="text-[19px] font-extrabold tracking-[-0.03em] text-white">
+            null<span class="text-emerald-glow font-black">·float</span>
+          </span>
+        </a>
+
+        <div class="hidden md:flex items-center space-x-8 text-[13px] font-medium text-sage">
+          <a href="#problem" class="hover:text-white transition-colors duration-200">The Problem</a>
+          <a href="#cns" class="hover:text-white transition-colors duration-200">CNS Invariant</a>
+          <a href="#quarantine" class="hover:text-white transition-colors duration-200">The Quarantine</a>
+          <a href="#architecture" class="hover:text-white transition-colors duration-200">Architecture</a>
+        </div>
+      </div>
+
+      <!-- Right Action Button (Dexter White Glowing Pill) -->
+      <div class="flex items-center space-x-4">
+        <a href="console.html" class="inline-flex items-center px-5 py-2 rounded-full text-xs font-semibold tracking-wide bg-white hover:bg-emerald-ice text-[#0F1A14] shadow-[0_0_20px_rgba(193,255,232,0.35)] transition-all duration-200 hover:-translate-y-px">
+          <span>Testing Console</span>
+          <svg class="w-3.5 h-3.5 ml-1.5 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+          </svg>
+        </a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- 1. HERO SECTION (The Clean Master Proposition)                            -->
+  <!-- ========================================================================= -->
+  <section class="relative z-10 max-w-7xl w-full mx-auto px-6 sm:px-10 min-h-[calc(100vh-90px)] flex items-center">
+    
+    <!-- THE LIGHT FUNNEL (VOLUMETRIC OPTICAL SHADER) -->
+    <div class="absolute -top-24 right-[8%] sm:right-[14%] lg:right-[20%] w-[350px] sm:w-[480px] lg:w-[560px] h-[750px] lg:h-[820px] pointer-events-none z-0">
+      <svg class="w-full h-full overflow-visible animate-beam-radiance" viewBox="0 0 600 850" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="optFade" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0" />
+            <stop offset="5%" stop-color="#FFFFFF" stop-opacity="0.95" />
+            <stop offset="85%" stop-color="#FFFFFF" stop-opacity="0.8" />
+            <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+          </linearGradient>
+
+          <mask id="volumetricMask">
+            <rect x="-100" y="0" width="800" height="850" fill="url(#optFade)" />
+          </mask>
+
+          <!-- Dexter Exact Funnel Core: #FFFFFF -> #C1FFE8 -> #92EBBF -> #27B666 -->
+          <linearGradient id="beamCore" x1="300" y1="0" x2="300" y2="850" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.98" />
+            <stop offset="10%" stop-color="#C1FFE8" stop-opacity="0.92" />
+            <stop offset="42%" stop-color="#92EBBF" stop-opacity="0.65" />
+            <stop offset="75%" stop-color="#27B666" stop-opacity="0.25" />
+            <stop offset="100%" stop-color="#080E0B" stop-opacity="0" />
+          </linearGradient>
+
+          <!-- Dexter Outer Aura: #102B1C -> #080E0B -->
+          <linearGradient id="beamAtmosphere" x1="300" y1="0" x2="300" y2="850" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#92EBBF" stop-opacity="0.45" />
+            <stop offset="28%" stop-color="#3AAB6D" stop-opacity="0.25" />
+            <stop offset="68%" stop-color="#102B1C" stop-opacity="0.12" />
+            <stop offset="100%" stop-color="#080E0B" stop-opacity="0" />
+          </linearGradient>
+
+          <linearGradient id="filamentBeam" x1="300" y1="0" x2="300" y2="850" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#FFFFFF" stop-opacity="1" />
+            <stop offset="30%" stop-color="#C1FFE8" stop-opacity="0.85" />
+            <stop offset="70%" stop-color="#92EBBF" stop-opacity="0.35" />
+            <stop offset="100%" stop-color="#102B1C" stop-opacity="0" />
+          </linearGradient>
+
+          <filter id="opticsWide" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="65" />
+          </filter>
+          <filter id="opticsMid" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="30" />
+          </filter>
+          <filter id="opticsCore" x="-25%" y="-25%" width="150%" height="150%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="16" />
+          </filter>
+          <filter id="opticsFilament" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" />
+          </filter>
+        </defs>
+
+        <g mask="url(#volumetricMask)">
+          <path d="M 90 0 C 220 180, 265 390, 276 850 L 324 850 C 335 390, 380 180, 510 0 Z" fill="url(#beamAtmosphere)" filter="url(#opticsWide)" />
+          <path d="M 160 0 C 248 160, 276 350, 286 850 L 314 850 C 324 350, 352 160, 440 0 Z" fill="url(#beamCore)" filter="url(#opticsMid)" />
+          <path d="M 215 0 C 262 140, 286 300, 293 850 L 307 850 C 314 300, 338 140, 385 0 Z" fill="url(#beamCore)" filter="url(#opticsCore)" opacity="0.95" />
+          <line x1="300" y1="0" x2="300" y2="850" stroke="url(#filamentBeam)" stroke-width="2.5" filter="url(#opticsFilament)" />
+          <line x1="300" y1="0" x2="300" y2="850" stroke="#FFFFFF" stroke-width="0.8" opacity="0.7" filter="url(#opticsFilament)" />
+
+          <!-- Mint / White Starlight Particles -->
+          <g opacity="0.95">
+            <circle cx="270" cy="95" r="1.8" fill="#FFFFFF" opacity="0.9" />
+            <circle cx="335" cy="75" r="1.5" fill="#C1FFE8" opacity="0.9" />
+            <circle cx="225" cy="45" r="2.0" fill="#92EBBF" opacity="0.8" />
+            <circle cx="365" cy="115" r="1.2" fill="#FFFFFF" opacity="0.9" />
+            <circle cx="295" cy="150" r="2.5" fill="#FFFFFF" opacity="0.98" />
+            <circle cx="282" cy="250" r="1.5" fill="#C1FFE8" opacity="0.85" />
+            <circle cx="322" cy="280" r="1.8" fill="#92EBBF" opacity="0.85" />
+            <circle cx="272" cy="330" r="1.2" fill="#FFFFFF" opacity="0.9" />
+            <circle cx="308" cy="390" r="2.0" fill="#C1FFE8" opacity="0.9" />
+            <circle cx="288" cy="450" r="1.4" fill="#92EBBF" opacity="0.75" />
+            <circle cx="314" cy="510" r="1.6" fill="#FFFFFF" opacity="0.85" />
+            <circle cx="296" cy="580" r="1.5" fill="#C1FFE8" opacity="0.75" />
+            <circle cx="306" cy="650" r="1.2" fill="#92EBBF" opacity="0.6" />
+            <circle cx="298" cy="730" r="1.6" fill="#FFFFFF" opacity="0.5" />
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <!-- MAIN HERO CONTENT -->
+    <div class="relative z-10 w-full py-16 lg:py-20">
+      
+      <!-- LEFT COLUMN -->
+      <div class="max-w-2xl lg:max-w-[52%] space-y-6">
+        
+        <!-- Subtle Eyebrow Badge -->
+        <div class="inline-flex items-center space-x-2.5 px-3 py-1 rounded-full bg-forest-surface/70 border border-emerald/20 backdrop-blur-md">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald shadow-[0_0_6px_#27B666]"></span>
+          <span class="text-[11px] font-mono font-medium text-emerald-mint tracking-wide uppercase">
+            Somnia 0x0100 Precompile • dreamDEX Settler
+          </span>
+        </div>
+
+        <!-- Master Headline (Dexter-grade: large + light weight) -->
+        <h1 class="text-[40px] sm:text-[52px] lg:text-[68px] xl:text-[78px] font-light tracking-[-0.03em] text-white leading-[1.08]">
+          Zero-inventory liquidity at <span class="bg-gradient-to-r from-white via-emerald-ice to-emerald-mint bg-clip-text text-transparent font-normal">Δt&nbsp;=&nbsp;0.</span>
+        </h1>
+
+        <!-- Subtitle (Dexter-grade: #8E9B94 silver sage) -->
+        <p class="text-sm sm:text-base text-sage font-normal leading-[1.65] max-w-lg">
+          Every 15 minutes, off-chain bots sit dead in a 30-second float drag. NULL-FLOAT redeems, checks continuity, and quotes inside Somnia’s <code class="text-emerald-mint font-mono text-xs px-1.5 py-0.5 rounded bg-forest-surface border border-emerald/20">0x0100</code> precompile in the exact same block.
+        </p>
+
+        <!-- Primary Action: Dexter Vibrant Emerald Button -->
+        <div class="pt-8 flex items-center space-x-6">
+          <a href="console.html" class="luxury-btn-primary inline-flex items-center justify-center px-7 py-3 rounded-full text-xs lg:text-sm tracking-wide">
+            <span>Open console</span>
+            <svg class="w-3.5 h-3.5 ml-1.5 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
+            </svg>
+          </a>
+
+          <a href="#problem" class="inline-flex items-center text-xs lg:text-sm font-medium text-sage hover:text-white transition-colors duration-200 group">
+            <span>Learn more</span>
+            <svg class="w-3.5 h-3.5 ml-1.5 transition-transform group-hover:translate-x-1 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+            </svg>
+          </a>
+        </div>
+
+      </div>
+
+      <!-- FLOATING CARDS (Dexter-style: absolute, scattered right) -->
+      <div class="hidden lg:block absolute inset-y-0 right-0 w-[48%] z-20">
+        
+        <!-- CARD 1 -->
+        <div class="absolute top-[10%] right-[2%] w-[270px] p-4 rounded-2xl dexter-glass card-glow-1 animate-card-float-1 z-20">
+          <div class="flex items-center justify-between pb-2 mb-2 border-b border-forest-border">
+            <div class="flex items-center space-x-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-400/90 shadow-[0_0_6px_rgba(251,113,133,0.5)]"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-lime/90 shadow-[0_0_6px_rgba(186,235,123,0.5)]"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-ice shadow-[0_0_6px_#C1FFE8]"></span>
+            </div>
+            <span class="text-[9px] font-mono text-emerald-mint font-semibold">WINDOW #100</span>
+          </div>
+          <div class="space-y-2 py-1.5">
+            <div class="h-1.5 w-4/5 rounded-full bg-forest-surface border border-emerald/15 overflow-hidden">
+              <div class="h-full w-full bg-gradient-to-r from-rose-500 to-rose-400"></div>
+            </div>
+            <div class="h-1.5 w-1/2 rounded-full bg-forest-surface border border-emerald/30 overflow-hidden">
+              <div class="h-full w-full bg-gradient-to-r from-emerald to-emerald-ice"></div>
+            </div>
+          </div>
+          <div class="mt-3 pt-1.5 text-[11px] font-semibold text-white tracking-tight flex items-center justify-between">
+            <span>Continuous Net Settlement</span>
+            <span class="font-mono text-[10px] text-emerald font-bold">Δb = 0</span>
+          </div>
+          <p class="text-[9px] text-sage mt-0.5 font-mono">Off-chain 30s float drag eliminated</p>
+        </div>
+
+        <!-- CARD 2 -->
+        <div class="absolute bottom-[28%] left-[5%] w-[250px] p-4 rounded-2xl dexter-glass card-glow-2 animate-card-float-2 z-30">
+          <div class="flex items-center justify-between pb-2 mb-2 border-b border-forest-border">
+            <div class="flex items-center space-x-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-white/30"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-white/30"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-white/30"></span>
+            </div>
+            <span class="text-[9px] font-mono text-emerald-mint font-bold tracking-wider">HEDGE 1:1</span>
+          </div>
+          <div class="flex justify-center py-2 relative">
+            <div class="w-11 h-11 rounded-xl bg-forest-abyss/90 border border-emerald/40 flex items-center justify-center shadow-[0_0_15px_rgba(39,182,102,0.3)]">
+              <span class="text-xs font-mono font-black text-emerald-mint tracking-tight">1.00</span>
+            </div>
+          </div>
+          <div class="mt-2 text-[11px] font-semibold text-white tracking-tight text-center">
+            <span>Zero-inventory parity</span>
+          </div>
+          <p class="text-[9px] text-sage font-mono text-center mt-0.5">YES $0.495 + NO $0.495 = $0.99</p>
+        </div>
+
+        <!-- CARD 3 -->
+        <div class="absolute bottom-0 right-0 sm:right-2 w-[250px] sm:w-[280px] p-4 rounded-2xl dexter-glass card-glow-3 animate-card-float-3 z-20">
+          <div class="flex items-center justify-between pb-2 mb-2 border-b border-forest-border">
+            <div class="flex items-center space-x-1.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-white/30"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-white/30"></span>
+              <span class="w-1.5 h-1.5 rounded-full bg-white/30"></span>
+            </div>
+            <span class="text-[9px] font-mono text-emerald-light font-bold uppercase tracking-wider">BRAKE ON</span>
+          </div>
+          <div class="flex justify-center py-2 relative">
+            <div class="w-11 h-11 rounded-xl bg-forest-abyss/90 border border-emerald-glow/40 flex items-center justify-center shadow-[0_0_15px_rgba(81,163,115,0.25)]">
+              <svg class="w-5 h-5 text-emerald-mint" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/>
+              </svg>
+            </div>
+          </div>
+          <div class="mt-2 text-[11px] font-semibold text-white tracking-tight text-center">
+            <span>Discontinuity quarantine</span>
+          </div>
+          <p class="text-[9px] text-sage font-mono text-center mt-0.5">Divergence &gt; 3.5% → Refusal</p>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 2. INSTITUTIONAL ECOSYSTEM STRIP                                          -->
+  <!-- ========================================================================= -->
+  <section class="relative z-10 border-y border-forest-border bg-[#09110D]/90 backdrop-blur-lg py-7">
+    <div class="max-w-7xl mx-auto px-6 sm:px-10">
+      <div class="flex flex-wrap items-center justify-center sm:justify-between gap-8 sm:gap-10">
+        
+        <div class="flex items-center space-x-2 text-[11px] font-mono tracking-wider text-sage">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald"></span>
+          <span class="text-white font-bold">SOMNIA</span>
+          <span class="text-sage/60">L1 CONSENSUS</span>
+        </div>
+
+        <div class="flex items-center space-x-2 text-[11px] font-mono tracking-wider text-sage">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-mint"></span>
+          <span class="text-white font-bold">DREAMDEX</span>
+          <span class="text-sage/60">CLOB SPOT POOL</span>
+        </div>
+
+        <div class="flex items-center space-x-2 text-[11px] font-mono tracking-wider text-sage">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald"></span>
+          <span class="text-white font-bold">DTCC 1968</span>
+          <span class="text-sage/60">CNS STANDARD</span>
+        </div>
+
+        <div class="flex items-center space-x-2 text-[11px] font-mono tracking-wider text-sage">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-ice"></span>
+          <span class="text-white font-bold">0x0100</span>
+          <span class="text-sage/60">PRECOMPILE</span>
+        </div>
+
+        <div class="flex items-center space-x-2 text-[11px] font-mono tracking-wider text-sage">
+          <span class="w-1.5 h-1.5 rounded-full bg-lime"></span>
+          <span class="text-white font-bold">ERC-4626</span>
+          <span class="text-sage/60">PUBLIC VAULT</span>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 3. SPLIT FEATURE 1: Left Text & Pill Stack / Right 3D Grid Diamond        -->
+  <!-- (Directly matches Astra Section 3: "Simplify your security with our services") -->
+  <!-- ========================================================================= -->
+  <section id="problem" class="relative z-10 max-w-7xl mx-auto px-6 sm:px-10 py-24 sm:py-32">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
+      
+      <!-- Left Column: Eyebrow + Title + Paragraph + 3 Stacked Interactive Pills -->
+      <div class="lg:col-span-6 space-y-7">
+        
+        <!-- Eyebrow -->
+        <div class="inline-flex items-center space-x-2 text-xs font-mono font-semibold uppercase tracking-[0.14em] text-emerald-mint">
+          <span>01 / The 15-Minute Event Lifecycle</span>
+        </div>
+
+        <!-- Section Title (Tier 1 Display) -->
+        <h2 class="text-3xl sm:text-4xl lg:text-[46px] font-extrabold tracking-[-0.035em] text-white leading-[1.1]">
+          Eliminate the 30-second liquidity desert.
+        </h2>
+
+        <!-- Explanatory Prose -->
+        <p class="text-sm sm:text-base text-sage leading-[1.65] max-w-xl">
+          When an event window closes on dreamDEX, off-chain bots are forced to wait for RPC confirmations, token redemptions, and mempool travel. NULL-FLOAT executes Continuous Net Settlement intra-block without external delays.
+        </p>
+
+        <!-- Stacked Pill Selectors (Exact Astra 3-pill structure with internal hierarchy) -->
+        <div class="space-y-3 pt-2">
+          
+          <!-- Pill 1: CNS -->
+          <div onclick="togglePill(this)" class="group rounded-2xl bg-forest-surface/80 border border-emerald/30 cursor-pointer transition-all hover:border-emerald/60 overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4">
+              <div class="flex items-center space-x-4">
+                <div class="w-8 h-8 rounded-xl bg-forest-card border border-emerald/40 flex items-center justify-center text-emerald-mint font-mono text-xs font-bold">
+                  01
+                </div>
+                <div>
+                  <div class="text-sm font-bold text-white tracking-tight">Continuous Net Settlement</div>
+                  <div class="text-[11px] text-sage font-mono mt-0.5">1968 DTCC Standard — Inventory Never Moves</div>
+                </div>
+              </div>
+              <div class="w-6 h-6 rounded-full bg-forest-card flex items-center justify-center text-emerald-mint transition-transform duration-200 pill-chevron">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                </svg>
+              </div>
+            </div>
+            <div class="pill-body max-h-0 transition-all duration-300 ease-out overflow-hidden">
+              <div class="px-5 pb-4 pt-0 text-[12px] text-sage leading-[1.7] border-t border-emerald/15 mx-5 pt-3">
+                In 1968, Wall Street was drowning in paper. The DTCC invented Continuous Net Settlement: instead of physically delivering every stock certificate, they just tracked the <em class="text-white font-medium not-italic">net obligations</em> between parties. NULL-FLOAT applies the same principle to dreamDEX event contracts — settling net positions intra-block so capital never sits idle between windows.
+              </div>
+            </div>
+          </div>
+
+          <!-- Pill 2: Precompile -->
+          <div onclick="togglePill(this)" class="group rounded-2xl bg-forest-obsidian/70 border border-forest-border cursor-pointer transition-all hover:border-emerald-glow/40 hover:bg-forest-surface/50 overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4">
+              <div class="flex items-center space-x-4">
+                <div class="w-8 h-8 rounded-xl bg-forest-card border border-emerald-glow/30 flex items-center justify-center text-emerald-glow font-mono text-xs font-bold">
+                  02
+                </div>
+                <div>
+                  <div class="text-sm font-semibold text-white tracking-tight">Reactive Precompile 0x0100</div>
+                  <div class="text-[11px] text-sage/80 font-mono mt-0.5">Intra-Block Execution — Zero External Keepers</div>
+                </div>
+              </div>
+              <div class="w-6 h-6 rounded-full bg-forest-card/60 flex items-center justify-center text-sage group-hover:text-emerald-glow transition-transform duration-200 pill-chevron">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                </svg>
+              </div>
+            </div>
+            <div class="pill-body max-h-0 transition-all duration-300 ease-out overflow-hidden">
+              <div class="px-5 pb-4 pt-0 text-[12px] text-sage leading-[1.7] border-t border-emerald-glow/15 mx-5 pt-3">
+                Somnia's <code class="text-emerald-mint font-mono text-[11px] px-1 py-0.5 rounded bg-forest-surface border border-emerald/20">0x0100</code> precompile fires code reactively when on-chain events occur — no off-chain keeper, no cron job, no RPC polling. When a dreamDEX event window closes, the clearinghouse settles, redeems, and re-quotes in the <em class="text-white font-medium not-italic">same block</em>. Float latency drops from ~30 seconds to exactly zero.
+              </div>
+            </div>
+          </div>
+
+          <!-- Pill 3: Parity Minting -->
+          <div onclick="togglePill(this)" class="group rounded-2xl bg-forest-obsidian/70 border border-forest-border cursor-pointer transition-all hover:border-lime/40 hover:bg-forest-surface/50 overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4">
+              <div class="flex items-center space-x-4">
+                <div class="w-8 h-8 rounded-xl bg-forest-card border border-lime/30 flex items-center justify-center text-lime font-mono text-xs font-bold">
+                  03
+                </div>
+                <div>
+                  <div class="text-sm font-semibold text-white tracking-tight">Zero-Inventory Parity Minting</div>
+                  <div class="text-[11px] text-sage/80 font-mono mt-0.5">YES + NO ≡ 1.000 — Symmetric Market Neutrality</div>
+                </div>
+              </div>
+              <div class="w-6 h-6 rounded-full bg-forest-card/60 flex items-center justify-center text-sage group-hover:text-lime transition-transform duration-200 pill-chevron">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/>
+                </svg>
+              </div>
+            </div>
+            <div class="pill-body max-h-0 transition-all duration-300 ease-out overflow-hidden">
+              <div class="px-5 pb-4 pt-0 text-[12px] text-sage leading-[1.7] border-t border-lime/15 mx-5 pt-3">
+                For every event window, NULL-FLOAT bids on <em class="text-white font-medium not-italic">both</em> sides — YES at \$0.495 and NO at \$0.495. Since one side always pays \$1.00 at resolution, the combined cost of \$0.99 guarantees a \$0.01 spread regardless of outcome. No directional risk. No inventory. Just deterministic yield returned to the public vault.
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Right Column: 3D Blueprint Stage with Glowing Parity Diamond (Exact Astra Right Box) -->
+      <div class="lg:col-span-6 flex justify-center lg:justify-end">
+        <div class="relative w-full max-w-[460px] h-[390px] sm:h-[430px] rounded-3xl bg-[#09110D]/95 border border-forest-border blueprint-grid flex items-center justify-center overflow-hidden shadow-[0_30px_70px_-15px_rgba(0,0,0,0.95)]">
+          
+          <!-- Ambient Emerald Aura Glow behind diamond -->
+          <div class="absolute w-[240px] h-[240px] rounded-full bg-emerald/20 blur-[80px] pointer-events-none"></div>
+
+          <!-- Floating Coordinate Telemetry Nodes -->
+          <div class="absolute top-5 left-5 font-mono text-[10px] text-sage/70">
+            SYS::CLEARING_ENGINE // t=0.000s
+          </div>
+          <div class="absolute top-5 right-5 font-mono text-[10px] text-emerald-mint font-semibold bg-forest-surface/90 px-2 py-0.5 rounded border border-emerald/30">
+            Δt = 0.00 ms
+          </div>
+
+          <!-- The Floating 3D Glowing Diamond (Matches Astra's exact green diamond: #50BB8D to #BAEB7B) -->
+          <div class="relative w-28 h-28 rounded-2xl bg-gradient-to-tr from-[#50BB8D] via-[#85D47E] to-[#BAEB7B] border-2 border-white/90 shadow-[0_0_35px_rgba(186,235,123,0.5)] flex items-center justify-center animate-diamond-pulse">
+            <!-- Cycle Arrow Icon (-45deg to offset parent 45deg rotation) -->
+            <svg class="w-12 h-12 text-[#080E0B] transform -rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+            </svg>
+          </div>
+
+          <!-- Bottom Telemetry Bar -->
+          <div class="absolute bottom-4 left-5 right-5 flex items-center justify-between text-[11px] font-mono text-sage border-t border-forest-border pt-3">
+            <span>FLOAT LATENCY: <strong class="text-emerald font-bold">0 BLOCKS</strong></span>
+            <span>STATUS: <strong class="text-white font-semibold">INTRA-BLOCK ACTIVE</strong></span>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 4. CENTER TRANSITION STATEMENT (Matches Astra "Faster. Smarter.")           -->
+  <!-- ========================================================================= -->
+  <section id="cns" class="relative z-10 max-w-4xl mx-auto px-6 text-center py-20 sm:py-28">
+    
+    <!-- Micro Tag -->
+    <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-forest-surface/80 border border-emerald/20 text-emerald-mint text-xs font-mono font-medium mb-5">
+      <span>Zero-Inventory Invariant</span>
+    </div>
+
+    <h2 class="text-3xl sm:text-5xl lg:text-[56px] font-extrabold tracking-[-0.04em] text-white leading-tight">
+      Zero inventory. Zero drag.
+    </h2>
+
+    <p class="mt-5 text-base sm:text-lg text-sage max-w-2xl mx-auto leading-relaxed">
+      Holding YES and NO simultaneously eliminates all market risk (<span class="font-mono text-emerald-mint font-semibold">$YES + NO ≡ 1.000</span>). All captured spread accrues directly into the non-custodial public vault.
+    </p>
+
+    <!-- Parity Ratio Badge -->
+    <div class="mt-8 inline-flex items-center space-x-6 px-6 py-2.5 rounded-full bg-forest-obsidian/80 border border-forest-border text-xs font-mono text-sage">
+      <span>Bid YES: <strong class="text-white">$0.4950</strong></span>
+      <span class="text-sage/50">+</span>
+      <span>Bid NO: <strong class="text-white">$0.4950</strong></span>
+      <span class="text-sage/50">=</span>
+      <span>Locked Spread: <strong class="text-emerald font-bold">+1.01%</strong></span>
+    </div>
+
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 5. FEATURE SECTION 2: Wide Box with Isometric Stack / The Refusal          -->
+  <!-- (Directly matches Astra Section 5: "Optimized for security" wide card)     -->
+  <!-- ========================================================================= -->
+  <section id="quarantine" class="relative z-10 max-w-7xl mx-auto px-6 sm:px-10 pb-32">
+    <div class="relative w-full rounded-3xl premium-slab p-8 sm:p-12 lg:p-16 overflow-hidden">
+      
+      <!-- Ambient Background Glow inside the container -->
+      <div class="absolute top-0 right-1/4 w-[480px] h-[480px] bg-emerald/10 rounded-full blur-[140px] pointer-events-none"></div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center relative z-10">
+        
+        <!-- Left Side: Title + Description + CTA (Matches Astra Left) -->
+        <div class="lg:col-span-6 space-y-6">
+          <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-amber-400/10 border border-amber-400/30 text-amber-300 text-xs font-mono font-medium">
+            <span>The Fatal Refusal Test</span>
+          </div>
+
+          <h3 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-white leading-tight">
+            The Discontinuity Quarantine.
+          </h3>
+
+          <p class="text-sm sm:text-base text-sage leading-relaxed max-w-lg">
+            Quoting blindly during an oracle shock or flash crash is financial suicide. When the Spot Price and the 1-second dreamDEX EMA diverge by more than <strong class="text-white font-semibold">350 bps (3.5%)</strong>, NULL-FLOAT halts instantly.
+          </p>
+
+          <!-- Defensiveness / Safety Telemetry Box -->
+          <div class="p-4 rounded-xl bg-forest-abyss/90 border border-amber-400/30 space-y-1.5 max-w-md">
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-white font-semibold">Circuit Breaker Status:</span>
+              <span class="text-amber-300 font-mono font-bold">100% SECURED</span>
+            </div>
+            <div class="text-[11px] text-sage leading-normal">
+              Refuses to deploy capital into toxic flow. Exactly 0 vault principal exposed during price dislocations.
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <a href="console.html" class="inline-flex items-center text-sm font-bold text-emerald-mint hover:text-white transition-colors group">
+              <span>Test Quarantine in Console</span>
+              <svg class="w-4 h-4 ml-1.5 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- Right Side: Isometric 3D Layer Stack (Matches Astra's tilted cascading cards) -->
+        <div id="architecture" class="lg:col-span-6 flex justify-center items-center py-6 scroll-mt-24">
+          <div class="relative w-full max-w-[420px] h-[340px] flex items-center justify-center [perspective:1000px]">
+            
+            <div class="w-full space-y-3 [transform:rotateX(28deg)_rotateZ(-22deg)] animate-iso-float">
+              
+              <!-- Layer 1: Reactivity Precompile -->
+              <div class="p-4 rounded-xl bg-gradient-to-r from-forest-surface to-forest-card border border-emerald/40 shadow-[0_8px_20px_rgba(39,182,102,0.15)] flex items-center justify-between text-xs font-mono">
+                <div class="flex items-center space-x-2">
+                  <span class="w-2 h-2 rounded-full bg-emerald animate-pulse"></span>
+                  <span class="text-white font-bold">01 / SOMNIA 0x0100 PRECOMPILE</span>
+                </div>
+                <span class="text-emerald-mint font-bold">Δt = 0.0ms</span>
+              </div>
+
+              <!-- Layer 2: Clearinghouse Core -->
+              <div class="p-4 rounded-xl bg-gradient-to-r from-forest-surface to-forest-card border border-emerald-glow/30 shadow-[0_8px_20px_rgba(81,163,115,0.1)] flex items-center justify-between text-xs font-mono">
+                <div class="flex items-center space-x-2">
+                  <span class="w-2 h-2 rounded-full bg-emerald-glow"></span>
+                  <span class="text-white font-bold">02 / NULL-FLOAT CLEARINGHOUSE</span>
+                </div>
+                <span class="text-emerald-mint font-semibold">ATM Parity</span>
+              </div>
+
+              <!-- Layer 3: Vault Pool -->
+              <div class="p-4 rounded-xl bg-gradient-to-r from-forest-surface to-forest-card border border-forest-border shadow-[0_8px_20px_rgba(0,0,0,0.35)] flex items-center justify-between text-xs font-mono">
+                <div class="flex items-center space-x-2">
+                  <span class="w-2 h-2 rounded-full bg-lime"></span>
+                  <span class="text-slate-200 font-semibold">03 / ERC-4626 PUBLIC VAULT</span>
+                </div>
+                <span class="text-lime font-semibold">Yield Pool</span>
+              </div>
+
+              <!-- Layer 4: dreamDEX CLOB -->
+              <div class="p-4 rounded-xl bg-forest-abyss/90 border border-forest-border/80 shadow-[0_8px_20px_rgba(0,0,0,0.4)] flex items-center justify-between text-xs font-mono text-sage">
+                <div class="flex items-center space-x-2">
+                  <span class="w-2 h-2 rounded-full bg-sage/40"></span>
+                  <span>04 / DREAMDEX CLOB ORDERBOOK</span>
+                </div>
+                <span class="text-[10px]">YES + NO</span>
+              </div>
+
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================================= -->
+  <!-- 6. FOOTER LAUNCH GATE                                                     -->
+  <!-- ========================================================================= -->
+  <footer class="relative z-10 border-t border-forest-border bg-[#060A08] py-12">
+    <div class="max-w-7xl mx-auto px-6 sm:px-10 flex flex-col sm:flex-row items-center justify-between gap-6">
+      <div class="flex items-center space-x-3">
+        <span class="w-2 h-2 rounded-full bg-emerald shadow-[0_0_6px_#27B666]"></span>
+        <span class="text-sm font-bold text-white tracking-tight">NULL-FLOAT</span>
+        <span class="text-xs text-sage/60 font-mono">| Somnia × dreamDEX Event Contracts Hackathon</span>
+      </div>
+
+      <div class="flex items-center space-x-6 text-xs text-sage font-mono">
+        <span>MIT LICENSE</span>
+        <span>DORAHACKS 2026</span>
+        <a href="console.html" class="text-emerald font-bold hover:text-emerald-mint">LAUNCH CONSOLE →</a>
+      </div>
+    </div>
+  </footer>
+
+
+  <script>
+    function togglePill(el) {
+      const body = el.querySelector('.pill-body');
+      const chevron = el.querySelector('.pill-chevron');
+      const isOpen = body.style.maxHeight && body.style.maxHeight !== '0px';
+      
+      if (isOpen) {
+        body.style.maxHeight = '0px';
+        chevron.style.transform = 'rotate(0deg)';
+      } else {
+        body.style.maxHeight = body.scrollHeight + 'px';
+        chevron.style.transform = 'rotate(90deg)';
+      }
+    }
+  </script>
+
+</body>
+</html>
